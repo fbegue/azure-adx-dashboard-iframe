@@ -2,15 +2,15 @@ import React, { useRef, useEffect } from "react";
 import { useMsal } from "@azure/msal-react";
 import {
   InteractionStatus,
-  InteractionRequiredAuthError,
+  InteractionRequiredAuthError
 } from "@azure/msal-browser";
 import "./app.css";
 
 const iframeConfig = {
-  cluster: "adx-cluster-soundfound",
-  database: "soundfound-db",
+  cluster: "kwetest.eastus",
+  database: "covid",
   features: "f-IFrameAuth=true&f-UseMeControl=false",
-  workspaceName: "kwe-embed-demo",
+  workspaceName: "kwe-embed-demo"
 };
 
 /**
@@ -36,14 +36,16 @@ function mapScope(scope) {
  * Post a postToken message
  */
 const postToken = (iframe, accessToken, scope) => {
-  console.log(`[postToken] scope: ${scope}, message length(accesstoken): ${accessToken.length}`);
+  console.log(
+      `[postToken] scope: ${scope}, message length(accesstoken): ${accessToken.length}`
+  );
   iframe.contentWindow.postMessage(
-    {
-      type: "postToken",
-      message: accessToken,
-      scope: scope,
-    },
-    "*" // Not secure
+      {
+        type: "postToken",
+        message: accessToken,
+        scope: scope
+      },
+      "*" // Not secure
   );
 };
 
@@ -53,12 +55,19 @@ export function App() {
 
   useEffect(() => {
     const handleIframeMessage = (event) => {
-      if (event.data.type !== "getToken" || event.origin !== "https://dataexplorer.azure.com") {
-        console.log(`[ignored] event.data.type: ${event.data.type}, event.data.scope: ${event.data.scope}`);
+      if (
+          event.data.type !== "getToken" ||
+          event.origin !== "https://dataexplorer.azure.com"
+      ) {
+        console.log(
+            `[ignored] event.data.type: ${event.data.type}, event.data.scope: ${event.data.scope}`
+        );
         return;
       }
 
-      console.log(`[getToken] event.data.type: ${event.data.type}, event.data.scope: ${event.data.scope}`);
+      console.log(
+          `[getToken] event.data.type: ${event.data.type}, event.data.scope: ${event.data.scope}`
+      );
 
       const aadScopes = mapScope(event.data.scope);
 
@@ -66,27 +75,27 @@ export function App() {
       if (event.data.type === "getToken" && iframe && iframe.contentWindow) {
         if (accounts.length > 0 && inProgress === InteractionStatus.None) {
           instance
-            .acquireTokenSilent({
-              scopes: aadScopes,
-              account: accounts[0],
-            })
-            .then((response) =>
-              postToken(iframe, response.accessToken, event.data.scope)
-            )
-            .catch((error) => {
-              if (error instanceof InteractionRequiredAuthError) {
-                instance
-                  .acquireTokenPopup({ scopes: aadScopes })
-                  .then((response) =>
-                    postToken(iframe, response.accessToken, event.data.scope)
-                  )
-                  .catch((error) => {
-                    console.log(`Error acquiring token: ${error}`);
-                  });
-              } else {
-                console.log(`Error acquiring token: ${error}`);
-              }
-            });
+              .acquireTokenSilent({
+                scopes: aadScopes,
+                account: accounts[0]
+              })
+              .then((response) =>
+                  postToken(iframe, response.accessToken, event.data.scope)
+              )
+              .catch((error) => {
+                if (error instanceof InteractionRequiredAuthError) {
+                  instance
+                      .acquireTokenPopup({ scopes: aadScopes })
+                      .then((response) =>
+                          postToken(iframe, response.accessToken, event.data.scope)
+                      )
+                      .catch((error) => {
+                        console.log(`Error acquiring token: ${error}`);
+                      });
+                } else {
+                  console.log(`Error acquiring token: ${error}`);
+                }
+              });
         }
       }
     };
@@ -101,10 +110,10 @@ export function App() {
   }, [iframeRef, accounts, inProgress, instance]);
 
   return (
-    <iframe
-      ref={iframeRef}
-      title="adx example"
-      src={`https://dataexplorer.azure.com/clusters/${iframeConfig.cluster}/databases/${iframeConfig.database}?${iframeConfig.features}&workspace=${iframeConfig.workspaceName}`}
-    />
+      <iframe
+          ref={iframeRef}
+          title="adx example"
+          src={`https://dataexplorer.azure.com/clusters/${iframeConfig.cluster}/databases/${iframeConfig.database}?${iframeConfig.features}&workspace=${iframeConfig.workspaceName}`}
+      />
   );
 }
