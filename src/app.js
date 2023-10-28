@@ -7,10 +7,10 @@ import {
 import "./app.css";
 
 const iframeConfig = {
-  cluster: "kwetest.eastus",
-  database: "covid",
+  cluster: "adx-cluster-soundfound",
+  database: "soundfound-db",
   features: "f-IFrameAuth=true&f-UseMeControl=false",
-  workspaceName: "kwe-embed-demo"
+  workspaceName: "kwe-embed-demo",
 };
 
 /**
